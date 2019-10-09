@@ -1,12 +1,12 @@
 /*
- * KspDesfire
- * 
- * Custom wrapper for mfrc522 and desfire for it.
- * Created speccial for this project.
- * 
- * By Kacper Serewis
- * 1.0
- */
+   KspDesfire
+
+   Custom wrapper for mfrc522 and desfire for it.
+   Created speccial for this project.
+
+   By Kacper Serewis
+   1.1
+*/
 
 #ifndef KspDesfire_h
 #define KspDesfire_h
@@ -15,15 +15,14 @@
 #include <MFRC522.h>
 #include <Desfire.h>
 
-#define MFRC_RST 9
-#define MFRC_SS 10
+#define MFRC_RST 21
+#define MFRC_SS 5
 
 #include "KspDebug.cpp"
 
 class KspDesfire
 {
   public:
-    char content_buf[130];
     KspDesfire()
     {
       this->kspDebug = new KspDebug(true, "KspDesfire");
@@ -35,15 +34,13 @@ class KspDesfire
       kspDebug->init();
       kspDebug->out("Debug inited!");
 
-      kspDebug->out("init: SPI!");
-      powerOn();
       kspDebug->out("pcd init");
       mfrc522->PCD_Init();
     }
 
     bool kspConnectionCheck() //do it in init()
     {
-      byte b = mfrc522->PCD_ReadRegister(0x37 << 1); //version register
+      byte b = mfrc522->PCD_ReadRegister(mfrc522->VersionReg); //version register
       kspDebug->out("RC522 Version:");
       kspDebug->outHex(b);
 
@@ -89,7 +86,7 @@ class KspDesfire
       return true;
     }
 
-    void _2_getName()
+    String _2_getName()
     {
       byte fileId = getFileID(0x00);
       if (desfire_error_occured()) return "";
@@ -97,10 +94,10 @@ class KspDesfire
       DESFire::mifare_desfire_file_settings_t settings = getFileSettings(fileId);
       if (desfire_error_occured()) return "";
 
-      getFileData(fileId, settings);
-      kspDebug->out(content_buf);
+      String _name = getFileData(fileId, settings);
+      return _name;
     }
-    void _2_getSchool()
+    String _2_getSchool()
     {
       byte fileId = getFileID(0x01);
       if (desfire_error_occured()) return "";
@@ -108,20 +105,17 @@ class KspDesfire
       DESFire::mifare_desfire_file_settings_t settings = getFileSettings(fileId);
       if (desfire_error_occured()) return "";
 
-      getFileData(fileId, settings);
-      kspDebug->out(content_buf);
+      String _school = getFileData(fileId, settings);
+      return _school;
+    }
+    String _3_getUID()
+    {
+      char str[32] = "";
+      array_to_string(mfrc522->uid.uidByte, mfrc522->uid.size, str);
+      return String(str);
     }
 
-    void powerOff()
-    {
-      //mfrc522->PCD_SoftPowerDown();
-      SPI.end();
-    }
-    void powerOn()
-    {
-      //mfrc522->PCD_SoftPowerUp();
-      SPI.begin();
-    }
+
 
 
 
@@ -131,7 +125,17 @@ class KspDesfire
     DESFire::StatusCode response;
 
     KspDebug* kspDebug;
-
+    void array_to_string(byte array[], unsigned int len, char buffer[])
+    {
+      for (unsigned int i = 0; i < len; i++)
+      {
+        byte nib1 = (array[i] >> 4) & 0x0F;
+        byte nib2 = (array[i] >> 0) & 0x0F;
+        buffer[i * 2 + 0] = nib1  < 0xA ? '0' + nib1  : 'A' + nib1  - 0xA;
+        buffer[i * 2 + 1] = nib2  < 0xA ? '0' + nib2  : 'A' + nib2  - 0xA;
+      }
+      buffer[len * 2] = '\0';
+    }
     bool newCardPresent()
     {
       if (!mfrc522->PICC_IsNewCardPresent())
@@ -161,9 +165,9 @@ class KspDesfire
 
     bool desfire_error_occured() {
       if (!mfrc522->IsStatusCodeOK(response)) {
-        kspDebug->out("=========");
-        kspDebug->out("= ERROR =");
-        kspDebug->out("=========");
+        kspDebug->out("=================");
+        kspDebug->out("= DESFIRE ERROR =");
+        kspDebug->out("=================");
         kspDebug->out(mfrc522->GetStatusCodeName(response));
         return true;
       }
@@ -188,14 +192,14 @@ class KspDesfire
     void selectApp(DESFire::mifare_desfire_aid_t aid) { //pass aid like this?!
       response = mfrc522->MIFARE_DESFIRE_SelectApplication(&tag, &aid);
     }
-    void getMasterKey() {
+    bool getMasterKey() {
       DESFire::mifare_desfire_aid_t aid;
       aid.data[0] = 0x00;
       aid.data[1] = 0x00;
       aid.data[2] = 0x00;
 
       selectApp(aid);
-      if (desfire_error_occured()) return;
+      if (desfire_error_occured()) return false;
 
       byte keySettings;
       byte keyCount = 0;
@@ -210,18 +214,21 @@ class KspDesfire
           }
         }
       }
+      return true;
 
     }
     DESFire::mifare_desfire_aid_t getApp(int index_id) {
-      DESFire::mifare_desfire_aid_t aids[2]; //was 16
+      DESFire::mifare_desfire_aid_t aids[16]; //was 16
       byte applicationCount = 0;
       response = mfrc522->MIFARE_DESFIRE_GetApplicationIds(&tag, aids, &applicationCount);
+      desfire_error_occured();
       return aids[index_id];
     }
     byte getFileID(int index_id) {
-      byte files[2]; //was 64
+      byte files[64]; //was 64
       byte filesCount = 0;
       response = mfrc522->MIFARE_DESFIRE_GetFileIDs(&tag, files, &filesCount);
+      desfire_error_occured();
       return files[index_id];
 
     }
@@ -230,13 +237,13 @@ class KspDesfire
       DESFire::mifare_desfire_file_settings_t fileSettings;
 
       response = mfrc522->MIFARE_DESFIRE_GetFileSettings(&tag, &(file), &fileSettings);
-
+      desfire_error_occured();
       kspDebug->outDescHex("file_type", fileSettings.file_type);
       kspDebug->outDescHex("file_size", fileSettings.settings.standard_file.file_size);
       return fileSettings;
     }
 
-    void getFileData(byte file, DESFire::mifare_desfire_file_settings_t fileSettings) {
+    String getFileData(byte file, DESFire::mifare_desfire_file_settings_t fileSettings) {
       //String getFileData(byte file, DESFire::mifare_desfire_file_settings_t fileSettings) {
       byte fileContent[fileSettings.settings.standard_file.file_size];
       size_t fileContentLength = fileSettings.settings.standard_file.file_size;
@@ -256,7 +263,7 @@ class KspDesfire
 
 
       kspDebug->out(buf);
-      memcpy(content_buf, buf, sizeof(content_buf));
+      return String(buf);
     }
 
 

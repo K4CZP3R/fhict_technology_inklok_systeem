@@ -5,7 +5,7 @@
  * Uses KspSerial to print to software serial.
  * 
  * By Kacper Serewis
- * 1.0
+ * 1.1
  */
 
 #ifndef KspDebug_h
@@ -14,18 +14,12 @@
 #include "Arduino.h"
 #include "KspSerial.cpp"
 
-#define SOFTWARE_RX 2
-#define SOFTWARE_TX 3
-#define SOFTWARE_BDRATE 9600
-
-
-
 class KspDebug
 {
   public:
     KspDebug(bool useSoftwareSerial, const char* moduleName)
     {
-      this->kspSerial = useSoftwareSerial ? new KspSerial(SOFTWARE_BDRATE, SOFTWARE_RX, SOFTWARE_TX) : new KspSerial(SOFTWARE_BDRATE);
+      this->kspSerial = useSoftwareSerial ? new KspSerial(true) : new KspSerial(false);
       this->moduleName = moduleName;
     }
     void init() {
@@ -82,6 +76,10 @@ class KspDebug
     {
       kspSerial->kspPrint(content, new_line);
     }
+    void plain_out(String content, bool new_line=true)
+    {
+      kspSerial->kspPrint(content, new_line);
+    }
     void out(const char* content)
     {
       printModuleName();
@@ -121,6 +119,9 @@ class KspDebug
       kspSerial->kspPrint("[");
       kspSerial->kspPrint(moduleName);
       kspSerial->kspPrint("] ");
+      kspSerial->kspPrint("<");
+      kspSerial->kspPrint(String(ESP.getFreeHeap()/1000));
+      kspSerial->kspPrint("kb free> ");
       set_color_to(-1);
     }
 };

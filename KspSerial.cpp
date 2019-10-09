@@ -5,7 +5,7 @@
  * (Makes it easier to use software serial like "hardware" serial)
  * 
  * By Kacper Serewis
- * 1.0
+ * 1.1
  */
 
 #ifndef KspSerial_h
@@ -14,70 +14,62 @@
 #include "Arduino.h"
 #include <SoftwareSerial.h>
 
+#define SOFT_RX 12
+#define SOFT_TX 14
+#define SOFT_BDRATE 57600
+#define HARD_BDRATE 115200
+
 class KspSerial
 {
   public:
-    KspSerial(int bdRate) 
+    KspSerial(bool useSoftSerial)
     {
-      this->bdRate = bdRate;
-    };
-
-    KspSerial(int bdRate, int rx, int tx) 
-    {
-      this->rx = rx;
-      this->tx = tx;
-      this->bdRate = bdRate;
-      this->useSoftSerial = true;
+      this->useSoftSerial = useSoftSerial;
     }
     int kspSerialRead()
     {
-      return useSoftSerial ? softSerial->read() : Serial.read();
+      return useSoftSerial ? softSerial.read() : Serial.read();
     }
     int kspSerialAvailable()
     {
-      return useSoftSerial ? softSerial->available() : Serial.available();
+      return useSoftSerial ? softSerial.available() : Serial.available();
     }
     void kspOpenSerial() 
     {
-      if (useSoftSerial) 
-      {
-        this->softSerial = new SoftwareSerial(rx, tx);
-      }
-      
-      this->useSoftSerial ? softSerial->begin(bdRate) : Serial.begin(bdRate);
+      this->useSoftSerial ? softSerial.begin(SOFT_BDRATE, SOFT_TX, SOFT_RX, SWSERIAL_8N1, false, 95, 11) : Serial.begin(HARD_BDRATE);
     };
 
     void kspPrint(const char* content, bool newLine = false) 
     {
-      useSoftSerial ? softSerial->print(content) : Serial.print(content);
-      if (newLine) useSoftSerial ? softSerial->println() : Serial.println();
+      useSoftSerial ? softSerial.print(content) : Serial.print(content);
+      if (newLine) useSoftSerial ? softSerial.println() : Serial.println();
     }
     void kspPrint(String content, bool newLine = false) 
     {
-      useSoftSerial ? softSerial->print(content) : Serial.print(content);
-      if (newLine) useSoftSerial ? softSerial->println() : Serial.println();
+      useSoftSerial ? softSerial.print(content) : Serial.print(content);
+      if (newLine) useSoftSerial ? softSerial.println() : Serial.println();
     }
     void kspPrint(int content, bool newLine = false) 
     {
-      useSoftSerial ? softSerial->print(content) : Serial.print(content);
-      if (newLine) useSoftSerial ? softSerial->println() : Serial.println();
+      useSoftSerial ? softSerial.print(content) : Serial.print(content);
+      if (newLine) useSoftSerial ? softSerial.println() : Serial.println();
     }
     void kspPrint(char content, bool newLine = false) 
     {
-      useSoftSerial ? softSerial->print(content) : Serial.print(content);
-      if (newLine) useSoftSerial ? softSerial->println() : Serial.println();
+      useSoftSerial ? softSerial.print(content) : Serial.print(content);
+      if (newLine) useSoftSerial ? softSerial.println() : Serial.println();
     }
     void kspPrintHex(int content, bool newLine = false) 
     {
-      useSoftSerial ? softSerial->print(content, HEX) : Serial.print(content, HEX);
-      if (newLine) useSoftSerial ? softSerial->println() : Serial.println();
+      useSoftSerial ? softSerial.print(content, HEX) : Serial.print(content, HEX);
+      if (newLine) useSoftSerial ? softSerial.println() : Serial.println();
     }
   private:
     int rx;
     int tx;
     int bdRate;
     bool useSoftSerial = false;
-    SoftwareSerial* softSerial;
+    SoftwareSerial softSerial;
 };
 
 #endif

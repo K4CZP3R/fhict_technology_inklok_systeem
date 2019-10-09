@@ -1,12 +1,12 @@
 /*
- * KspMonitor
- * 
- * Simple watchdog and other arduino-related functions.
- * ex: restarts arduino when critical error occures.
- * 
- * By Kacper Serewis
- * 1.0
- */
+   KspMonitor
+
+   Simple watchdog and other arduino-related functions.
+   ex: restarts arduino when critical error occures.
+
+   By Kacper Serewis
+   1.1
+*/
 
 #ifndef KspMonitor_h
 #define KspMonitor_h
@@ -27,20 +27,17 @@ class KspMonitor
     {
       kspDebug->init();
       kspDebug->out("Debug inited!");
-
-      kspDebug->out("Setting reset pin...");
-      digitalWrite(RESET_PIN, HIGH);
-      pinMode(RESET_PIN, OUTPUT);
-      kspDebug->out("OK!");
     }
+    int freeRam() {
 
+      return ESP.getFreeHeap();
+    }
     void reset()
     {
-      kspDebug->out("WILL RESTART ARDUINO");
+      kspDebug->out("WILL RESTART ESP32!");
       delay(RESET_DELAY);
       kspDebug->out("Goodbye.");
-      digitalWrite(RESET_PIN, LOW);
-      kspDebug->out("You can't see this message");
+      ESP.restart();
     }
   private:
     KspDebug* kspDebug;

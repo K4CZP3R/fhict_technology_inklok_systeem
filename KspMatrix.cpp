@@ -1,22 +1,27 @@
 /*
- * KspMatrix
- * 
- * Handles animations for 8x8 matrix panel.
- * Special module created for this project.
- * 
- * By Kacper Serewis
- * 1.0
- */
+   KspMatrix
+
+   Handles animations for 8x8 matrix panel.
+   Special module created for this project.
+
+   By Kacper Serewis
+   1.1
+*/
 #ifndef KspMatrix_h
 #define KspMatrix_h
 
-#include "LedControl.h"
+
 #include "KspDebug.cpp"
 #include <SPI.h>
+#include "LedMatrix.h"
+
 
 #define MATRIX_ID 0
 #define MATRIX_INTENSITY 8
 
+#define DIN 19
+#define CLK 23
+#define CS 17
 
 class KspMatrix
 {
@@ -24,7 +29,7 @@ class KspMatrix
     KspMatrix()
     {
       this->kspDebug = new KspDebug(true, "kspMatrix");
-      this->lc = new LedControl(12, 11, 6, 1);
+      this->ledMatrix = new LedMatrix(1, 23, 2, 19, 17);
     }
 
     void init()
@@ -32,71 +37,47 @@ class KspMatrix
       kspDebug->init();
       kspDebug->out("Debug inited");
 
-      lc->shutdown(MATRIX_ID, false);
-      lc->setIntensity(MATRIX_ID, MATRIX_INTENSITY);
-      lc->clearDisplay(MATRIX_ID);
-
-      kspDebug->out("LedControl inited!");
+      ledMatrix->init();
+      ledMatrix->clear();
+      ledMatrix->setIntensity(15);
     }
-    void a_touch(int frame)
+
+    void fill_random()
     {
-      byte sprites[][8] =
+      for(int i=0; i<8; i++)
       {
-        { B00000000, B00000000, B00010000, B01101000, B01101000, B00010000, B00000000, B00000000}, //frame 0
-        {B00000000, B00001000, B00000100, B01100100, B01100100, B00000100, B00001000, B00000000}, //frame 1
-        {B00000100, B00000010, B00000010, B01100010, B01100010, B00000010, B00000010, B00000100} //frame 3
-      };
-
-      show_animation(sprites[frame]);
+        ledMatrix->setColumn(i, (byte)random(0,255));
+      }
+      ledMatrix->commit();
     }
-    void a_ok()
+    void sprite_wait()
     {
-      byte sprite_ok[] = { B00000000, B00000001, B00000010, B01000100, B00101000, B00010000, B00000000, B00000000};
-
-      show_animation(sprite_ok);
+      byte sprite_wait[] {B00111000, B00000100, B00000100, B00001000, B00010000, B00010000, B00000000, B00010000};
+      show_sprite(sprite_wait);
     }
-    void a_bad()
+    void sprite_bad()
     {
       byte sprite_bad[] = { B11000011, B11100111, B01100110, B00011000, B00011000, B01100110, B11100111, B11000011};
-      show_animation(sprite_bad);
+      show_sprite(sprite_bad);
     }
-    void a_wait()
+    void sprite_ok()
     {
-      byte sprite_wait[] = { B00111000, B00000100, B00000100, B00001000, B00010000, B00010000, B00000000, B00010000};
-      show_animation(sprite_wait);
+      byte sprite_ok[] = { B00000000, B00000001, B00000010, B01000100, B00101000, B00010000, B00000000, B00000000};
+      show_sprite(sprite_ok);
     }
-
-    void a_com_wait(int frame)
-    {
-      byte sprites[][8] = 
-      {
-        {B00000000,B00011100,B00000010,B00000000,B00000000,B00000000,B00000000,B00000000},
-        {B00000000,B00011100,B00000010,B00000000,B00000000,B00000000,B00000000,B00000000},
-        {B00000000,B00000100,B00000010,B00000010,B00000010,B00000000,B00000000,B00000000},
-        {B00000000,B00000000,B00000000,B00000010,B00000010,B00000010,B00000100,B00000000},
-        {B00000000,B00000000,B00000000,B00000000,B00000000,B00000010,B00011100,B00000000},
-        {B00000000,B00000000,B00000000,B00000000,B00000000,B01000000,B00111000,B00000000},
-        {B00000000,B00000000,B00000000,B01000000,B01000000,B01000000,B00100000,B00000000},
-        {B00000000,B00100000,B01000000,B01000000,B01000000,B00000000,B00000000,B00000000},
-        {B00000000,B00111000,B01000000,B00000000,B00000000,B00000000,B00000000,B00000000},
-      };
-
-      show_animation(sprites[frame]);
-    }
-
 
   private:
-    LedControl* lc;
+    LedMatrix* ledMatrix;
     KspDebug* kspDebug;
 
-    void show_animation(byte anim[])
+    void show_sprite(byte sprite[])
     {
       for (int i = 0; i < 8; i++)
       {
-        lc->setRow(0, i, anim[i]);
+        ledMatrix->setColumn(i, sprite[i]);
       }
+      ledMatrix->commit();
     }
-
 };
 
 #endif
