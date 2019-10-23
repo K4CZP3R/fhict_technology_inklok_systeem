@@ -50,7 +50,7 @@ class KspCommunication
       int buf_n = 0;
       bool end_magic_found = false;
       bool start_magic_found = false;
-      while(kspSerial->kspSerialAvailable() > 0 && end_magic_found == false)
+      while(kspSerial->kspSerialAvailable() > 0 && !end_magic_found)
       {
         int cur_byte = kspSerial->kspSerialRead();
         kspDebug->outDescHex("recv",cur_byte);

@@ -100,17 +100,8 @@ void loop()
       kspDebug.out(_uid);
 
       kspMatrix.sprite_ok();
-      kspCommunication.kspSendCommand("begin_auth");
-      kspCommunication.kspSendCommand("s_name");
-      kspCommunication.kspSendCommand(_name);
-      kspCommunication.kspSendCommand("e_name");
-      //kspCommunication.kspSendCommand(_school);
-      
-      kspCommunication.kspSendCommand("s_uid");
-      kspCommunication.kspSendCommand(_uid);
-      kspCommunication.kspSendCommand("e_uid");
-      
-      kspCommunication.kspSendCommand("end_auth");
+
+      kspCommunication.kspSendCommand("auth["+_name+"|"+_uid+"]");
       delay(1000);
 
     }
