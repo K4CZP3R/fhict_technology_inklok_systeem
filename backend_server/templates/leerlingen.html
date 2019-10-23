@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+{% with title="Leerlingen" %}
+{% include '_base_head.html' %}
+{% endwith %}
+
+<body class="text-center">
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+        {% include '_base_header.html' %}
+
+        <main role="main" class="inner cover">
+            <div class="card text-white bg-dark mb-3" style="width: 125%;">
+                <div class="card-header">Leerlingen</div>
+                <div class="card-body">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th scope="col">Foto</th>
+                                <th scope="col">Voornaam</th>
+                                <th scope="col">Achternaam</th>
+                                <th scope="col">UUID</th>
+                                <th scope="col">Card UUID</th>
+                                <th scope="col">#</th>
+                                <th scope="col">#</th>
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for leerling in leerlingen %}
+                            <tr>
+                                <td>
+                                    <img src="{{photo_url}}/{{leerling['uuid']}}" class="card-img">
+                                </td>
+                                <td>{{leerling["voornaam_letter"]}}</td>
+                                <td>{{leerling["achternaam"]}}</td>
+                                <td>{{leerling["uuid"]}}</td>
+                                <td>{{leerling["card_uuid"]}}</td>
+                                <th scope="col">
+                                    <a href="{{edit_url}}/{{leerling['uuid']}}">edit</a>
+                                </th>
+                                <th scope="col">
+                                    <a href="{{logs_url}}/{{leerling['card_uuid']}}">logs</a>
+                                </th>
+                            </tr>
+                            {% endfor %}
+
+                        </tbody>
+                    </table>
+                    <a class="btn btn-primary" href="{{add_url}}">Maak een nieuwe</a>
+
+                </div>
+            </div>
+        </main>
+        {% include '_base_footer.html' %}
+    </div>
+
+
+</body>
+
+</html>

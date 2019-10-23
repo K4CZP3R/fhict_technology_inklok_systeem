@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+{% with title="Logs" %}
+{% include '_base_head.html' %}
+{% endwith %}
+
+<body class="text-center">
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+        {% include '_base_header.html' %}
+
+        <main role="main" class="inner cover">
+            <div class="card text-white bg-dark mb-3" style="width: 110%;">
+                <div class="card-header">Logs</div>
+                <div class="card-body">
+                    <table class="table table-dark">
+                        <thead>
+                            <tr>
+                                <th scope="col">card_uuid</th>
+                                <th scope="col">log_time</th>
+                                <th scope="col">log_type</th>
+                                <th scope="col">#</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in logs %}
+                            <tr>
+                                <td>{{log["card_uuid"]}}</td>
+                                <td>{{log["log_time"]}}</td>
+                                <td>{{log["log_type"]}}</td>
+                                
+                                {% if log["log_type"] == "klok_in" %}
+                                <td><img style="height: 48px;"src="http://pixsector.com/cache/a8009c95/av8a49a4f81c3318dc69d.png"></td>
+                                {% else %}
+                                <td><img style="height: 48px; transform: scaleX(-1);" src="http://pixsector.com/cache/a8009c95/av8a49a4f81c3318dc69d.png"></td>
+                                {% endif %}
+                                
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+        {% include '_base_footer.html' %}
+    </div>
+</body>
+
+</html>

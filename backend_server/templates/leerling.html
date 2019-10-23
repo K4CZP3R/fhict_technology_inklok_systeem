@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+{% with title="Leerling" %}
+{% include '_base_head.html' %}
+{% endwith %}
+
+<body class="text-center">
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+        {% include '_base_header.html' %}
+
+        <main role="main" class="inner cover">
+            <div class="card mb-3 text-white bg-dark" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <div class="col-md-4">
+                        <img src="{{photo_url}}/{{leerling['uuid']}}"
+                            class="card-img" alt="...">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">Leerling</h5>
+                            <p class="card-text">
+                                {{leerling["voornaam_letter"]}}.{{leerling["achternaam"]}}
+                            </p>
+                            <p class="card-text"><small class="text-muted">{{leerling['uuid']}}</small></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3 text-white bg-dark">
+                <div class="card-header">
+                    Foto uploaden
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" action="{{photo_url}}/{{leerling['uuid']}}">
+                        <input type="file" name="file" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                </div>
+            </div>
+
+
+            <div class="card text-white bg-dark">
+                <div class="card-header">
+                    Aanpassen
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {% for entry in leerling_entries %}
+                        <div class="form-group">
+                            <label for="{{entry}}">{{entry}}</label>
+                            <input type="text" class="form-control" id="{{entry}}" name="{{entry}}"
+                                placeholder="{{leerling[entry]}}" value="{{leerling[entry]}}">
+                        </div>
+                        {% endfor %}
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                    <br>
+                    <button class="btn btn-primary" onclick="generateUUID()">Generate UUID</button>
+                    <a class="btn btn-primary" href="{{remove_url}}/{{leerling['uuid']}}">Remove user</a>
+                </div>
+            </div>
+        </main>
+
+        {% include '_base_footer.html' %}
+    </div>
+    <script>
+
+        function uuidv4() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function generateUUID() {
+            document.getElementById("uuid").value = uuidv4();
+        }
+    </script>
+
+</body>
+
+</html>

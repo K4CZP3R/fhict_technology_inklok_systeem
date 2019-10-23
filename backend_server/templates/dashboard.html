@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+{% with title="Logs" %}
+{% include '_base_head.html' %}
+{% endwith %}
+
+<body class="text-center">
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+        {% include '_base_header.html' %}
+
+        <main role="main" class="inner cover">
+            <div class="card-group">
+            {% for tool in tools %}
+            <div class="card text-white bg-dark mb-3" style="width: 18rem;">
+                <img src="/static/images/{{tool['img_name']}}" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">{{tool['title']}}</h5>
+                    <p class="card-text">{{tool['description']}}</p>
+                    <a href="{{tool['url']}}" class="btn btn-primary">Go</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        </main>
+        {% include '_base_footer.html' %}
+    </div>
+</body>
+
+</html>
